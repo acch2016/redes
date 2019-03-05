@@ -13,9 +13,9 @@
 #include "semphr.h"
 #include "event_groups.h"
 
+#define NUMBER_OF_PIT (2)
 #define EVENT_PIT0 (1<<0)
 #define EVENT_PIT1 (1<<1)
-
 #define GET_ARGS(args,type) *((type*)args)
 
 typedef struct
@@ -30,7 +30,7 @@ typedef struct
 
 static lin_pit_hanlde_t pit_hanlde[NUMBER_OF_PIT] = {0};
 
-static inline void lin_pit_init(lin_pit_t base, float period);
+static inline void lin_pit_init(lin_pit_t, float);
 static inline void nvic_enable_irq_nvic_set_priority(lin_pit_t base);
 
 void PIT0_IRQHandler(void)
