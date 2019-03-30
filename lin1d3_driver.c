@@ -113,14 +113,14 @@ static void master_task(void *pvParameters)
 	{
 		uint8_t allBits;
 		struct{
-			uint8_t bit7 :1;
-			uint8_t bit6 :1;
-			uint8_t bit5 :1;
-			uint8_t bit4 :1;
-			uint8_t bit3 :1;
-			uint8_t bit2 :1;
-			uint8_t bit1 :1;
-			uint8_t bit0 :1;
+			uint8_t P1 :1;
+			uint8_t P0 :1;
+			uint8_t ID5 :1;
+			uint8_t ID4 :1;
+			uint8_t ID3 :1;
+			uint8_t ID2 :1;
+			uint8_t ID1 :1;
+			uint8_t ID0 :1;
 		}bitField;
 	} myData;
 
@@ -168,8 +168,8 @@ static void master_task(void *pvParameters)
         	lin1p3_header[2] = ID<<2;
         	/* TODO: put the parity bits */
         	portDBits.allBits = lin1p3_header[2];
-        	portDBits.bitField.bit6 = portDBits.bitField.bit0 ^ portDBits.bitField.bit1 ^ portDBits.bitField.bit2 ^ portDBits.bitField.bit4;
-        	portDBits.bitField.bit7 = portDBits.bitField.bit1 ^ portDBits.bitField.bit3 ^ portDBits.bitField.bit4 ^ portDBits.bitField.bit5;
+        	portDBits.bitField.P0 = portDBits.bitField.ID0 ^ portDBits.bitField.ID1 ^ portDBits.bitField.ID2 ^ portDBits.bitField.ID4;
+        	portDBits.bitField.P1 = portDBits.bitField.ID1 ^ portDBits.bitField.ID3 ^ portDBits.bitField.ID4 ^ portDBits.bitField.ID5;
         	lin1p3_header[2] = portDBits.allBits;
 
         	/* Init the message recevie buffer */
@@ -209,6 +209,25 @@ static void slave_task(void *pvParameters)
 	size_t n;
 	uint8_t  msg_idx;
 
+	/**Definition of a bitfield*/
+	typedef union
+	{
+		uint8_t allBits;
+		struct{
+			uint8_t P1 :1;
+			uint8_t P0 :1;
+			uint8_t ID5 :1;
+			uint8_t ID4 :1;
+			uint8_t ID3 :1;
+			uint8_t ID2 :1;
+			uint8_t ID1 :1;
+			uint8_t ID0 :1;
+		}bitField;
+	} myData;
+
+	/**Variable declaration of myData type*/
+	myData uBits = {0};
+
 	if(handle == NULL) {
 		vTaskSuspend(NULL);
 	}
@@ -235,9 +254,15 @@ static void slave_task(void *pvParameters)
     	memset(lin1p3_header, 0, size_of_lin_header_d);
     	/* Wait for header on the UART */
     	UART_RTOS_Receive(&(handle->uart_rtos_handle), lin1p3_header, size_of_lin_header_d, &n);
+
+    	uBits.allBits = lin1p3_header[2]; // Copy Data to Union
     	/* Check header */
     	if((lin1p3_header[0] != 0x00) &&
-    	   (lin1p3_header[1] != 0x55)) {
+    	   (lin1p3_header[1] != 0x55) &&
+		   (uBits.bitField.P0 != (uBits.bitField.ID0 ^ uBits.bitField.ID1 ^ uBits.bitField.ID2 ^ uBits.bitField.ID4) ) &&
+		   (uBits.bitField.P1 != (uBits.bitField.ID1 ^ uBits.bitField.ID3 ^ uBits.bitField.ID4 ^ uBits.bitField.ID5) ) )
+
+    	{
     		/* TODO: Check ID parity bits */
     		/* Header is not correct we are ignoring the header */
     		continue;
