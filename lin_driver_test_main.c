@@ -57,9 +57,11 @@ static void test_task(void *pvParameters);
 static void	message_1_callback_master(void* message);
 static void	message_2_callback_master(void* message);
 static void	message_3_callback_master(void* message);
+#if !defined(JUST_MASTER)
 static void	message_1_callback_slave(void* message);
 static void	message_2_callback_slave(void* message);
 static void	message_3_callback_slave(void* message);
+#endif
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -159,23 +161,24 @@ static void test_task(void *pvParameters)
 static void	message_1_callback_master(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
-	PRINTF("Master got response to message 1 %d,%d\r\n", message_data[0], message_data[1]);
+	uint16_t adc_value = message_data[0] | (message_data[1] << 8);
+	PRINTF("Master got response to message 1 L:%d,H:%d  value:%d\r\n", message_data[0], message_data[1], adc_value);
 }
 
 static void	message_2_callback_master(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
-	PRINTF("Master got response to message 2 %d,%d,%d,%d\r\n", message_data[0], message_data[1], message_data[2], message_data[3]);
+	PRINTF("Master got response to message 2 %c%c%c %c%c\r\n", message_data[0], message_data[1], message_data[2], message_data[3], message_data[4]);
 }
 
 static void	message_3_callback_master(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
-	PRINTF("Master got response to message 3 %d,%d,%d,%d,%d,%d,%d,%d\r\n",
-			message_data[0], message_data[1], message_data[2], message_data[3],
-			message_data[4], message_data[5], message_data[6], message_data[7]);
+	PRINTF("Master got response to message 3 %c%c%c %c%c%c\r\n",
+			message_data[0], message_data[1], message_data[2],
+			message_data[3], message_data[4], message_data[5]);
 }
-
+#if !defined(JUST_MASTER)
 static void	message_1_callback_slave(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
@@ -207,4 +210,4 @@ static void	message_3_callback_slave(void* message)
 	message_data[6] = 85;
 	message_data[7] = 86;
 }
-
+#endif
