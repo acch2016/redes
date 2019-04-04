@@ -168,15 +168,16 @@ static void	message_1_callback_master(void* message)
 static void	message_2_callback_master(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
-	PRINTF("Master got response to message 2 %c%c%c %c%c\r\n", message_data[0], message_data[1], message_data[2], message_data[3], message_data[4]);
+	PRINTF("Master got response to message 2 %d\r\n", message_data[0]);
+//	message_data[0], message_data[1], message_data[2], message_data[3], message_data[4]);
 }
 
 static void	message_3_callback_master(void* message)
 {
 	uint8_t* message_data = (uint8_t*)message;
-	PRINTF("Master got response to message 3 %c%c%c %c%c%c\r\n",
-			message_data[0], message_data[1], message_data[2],
-			message_data[3], message_data[4], message_data[5]);
+	PRINTF("Master got response to message 3 %d\r\n", message_data[0]);
+//			message_data[0], message_data[1], message_data[2],
+//			message_data[3], message_data[4], message_data[5]);
 }
 #if !defined(JUST_MASTER)
 static void	message_1_callback_slave(void* message)
